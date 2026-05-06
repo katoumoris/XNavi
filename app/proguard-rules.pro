@@ -1,0 +1,6 @@
+# 高德地图
+-keep class com.amap.api.** { *; }
+-keep class com.autonavi.** { *; }
+-keep class com.loc.** { *; }
+-dontwarn com.amap.api.**
+-dontwarn com.autonavi.**
