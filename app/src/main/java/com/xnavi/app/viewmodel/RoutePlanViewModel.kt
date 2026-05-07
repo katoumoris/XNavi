@@ -81,7 +81,7 @@ class RoutePlanViewModel(application: Application) : AndroidViewModel(applicatio
         }
     }
 
-    fun setTravelMode(mode: TravelMode) {
+    fun changeTravelMode(mode: TravelMode) {
         travelMode = mode
         searchRoute()
     }

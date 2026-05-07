@@ -259,7 +259,7 @@ fun MainScreen(
                                 viewModel.selectedPoi?.let { poi ->
                                     routePlanViewModel.setDestination(poi.name, poi.latLng)
                                 }
-                                routePlanViewModel.setTravelMode(TravelMode.DRIVING)
+                                routePlanViewModel.changeTravelMode(TravelMode.DRIVING)
                                 navController.navigate("navigation")
                             },
                             modifier = Modifier.weight(1f)

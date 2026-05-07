@@ -53,6 +53,12 @@ android {
     }
 }
 
+configurations.all {
+    resolutionStrategy {
+        force("com.amap.api:location:6.4.0")
+    }
+}
+
 dependencies {
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
@@ -68,10 +74,11 @@ dependencies {
 
     implementation("androidx.navigation:navigation-compose:2.7.6")
 
-    implementation("com.amap.api:3dmap:10.0.600")
-    implementation("com.amap.api:location:6.4.0")
+    implementation("com.amap.api:3dmap:10.0.600") {
+        exclude(group = "com.amap.api", module = "location")
+    }
+    compileOnly("com.amap.api:location:6.4.0")
     implementation("com.amap.api:search:9.7.0")
-    implementation("com.amap.api:navi-3dmap:10.0.600_3dmap10.0.600")
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
     implementation("androidx.datastore:datastore-preferences:1.0.0")

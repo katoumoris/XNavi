@@ -187,7 +187,7 @@ fun RoutePlanScreen(
 
             TravelModeTabs(
                 selectedMode = routeViewModel.travelMode,
-                onModeSelected = { routeViewModel.setTravelMode(it) }
+                onModeSelected = { routeViewModel.changeTravelMode(it) }
             )
 
             Box(modifier = Modifier.weight(1f)) {
