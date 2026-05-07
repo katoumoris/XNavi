@@ -61,14 +61,18 @@ fun NavigationScreen(
 
     LaunchedEffect(routeViewModel.driveRouteResult) {
         routeViewModel.driveRouteResult?.paths?.firstOrNull()?.let { path ->
-            navViewModel.initialize(path)
-            aMap?.let { map ->
-                val points = navViewModel.routePoints
-                if (points.isNotEmpty()) {
-                    map.addPolyline(
-                        PolylineOptions().addAll(points)
-                            .color(0xFF1678FF.toInt()).width(18f)
-                    )
+            val startLatLng = routeViewModel.origin?.latLng
+            val endLatLng = routeViewModel.destination?.latLng
+            if (startLatLng != null && endLatLng != null) {
+                navViewModel.initialize(path, startLatLng, endLatLng)
+                aMap?.let { map ->
+                    val points = navViewModel.routePoints
+                    if (points.isNotEmpty()) {
+                        map.addPolyline(
+                            PolylineOptions().addAll(points)
+                                .color(0xFF1678FF.toInt()).width(18f)
+                        )
+                    }
                 }
             }
         }

@@ -160,7 +160,13 @@ fun MainScreen(
                 Icon(Icons.Default.MyLocation, contentDescription = "定位")
             }
             FloatingActionButton(
-                onClick = { navController.navigate("route_plan//") },
+                onClick = { 
+                    viewModel.currentLocation?.let { loc ->
+                        val originLat = loc.latitude
+                        val originLng = loc.longitude
+                        navController.navigate("route_plan/$originLat,$originLng/")
+                    } ?: navController.navigate("route_plan/")
+                },
                 containerColor = MaterialTheme.colorScheme.surface,
                 contentColor = MaterialTheme.colorScheme.primary
             ) {
@@ -259,7 +265,7 @@ fun MainScreen(
                                 viewModel.selectedPoi?.let { poi ->
                                     routePlanViewModel.setDestination(poi.name, poi.latLng)
                                 }
-                                routePlanViewModel.setTravelMode(TravelMode.DRIVING)
+                                routePlanViewModel.changeTravelMode(TravelMode.DRIVING)
                                 navController.navigate("navigation")
                             },
                             modifier = Modifier.weight(1f)

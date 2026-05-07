@@ -43,12 +43,34 @@ android {
     }
 
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.5"
+        kotlinCompilerExtensionVersion = "1.5.8"
     }
 
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
+            excludes += "META-INF/DEPENDENCIES"
+            excludes += "META-INF/LICENSE"
+            excludes += "META-INF/LICENSE.txt"
+            excludes += "META-INF/license.txt"
+            excludes += "META-INF/NOTICE"
+            excludes += "META-INF/NOTICE.txt"
+            excludes += "META-INF/notice.txt"
+            excludes += "META-INF/ASL2.0"
+            excludes += "META-INF/*.kotlin_module"
+        }
+        jniLibs {
+            pickFirsts += listOf("libamap*.so", "libGdip*.so", "libDatammap*.so")
+        }
+    }
+}
+
+configurations.all {
+    resolutionStrategy {
+        eachDependency {
+            if (requested.group == "com.amap.api" && requested.name == "location") {
+                useVersion("6.4.0")
+            }
         }
     }
 }
@@ -68,10 +90,11 @@ dependencies {
 
     implementation("androidx.navigation:navigation-compose:2.7.6")
 
-    implementation("com.amap.api:3dmap:10.0.600")
-    implementation("com.amap.api:location:6.4.0")
+    implementation("com.amap.api:3dmap:10.0.600") {
+        exclude(group = "com.amap.api", module = "location")
+    }
+    compileOnly("com.amap.api:location:6.4.0")
     implementation("com.amap.api:search:9.7.0")
-    implementation("com.amap.api:navi-3dmap:10.0.600_3dmap10.0.600")
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
     implementation("androidx.datastore:datastore-preferences:1.0.0")

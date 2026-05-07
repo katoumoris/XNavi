@@ -23,7 +23,6 @@ import com.amap.api.maps.model.LatLng
 import com.amap.api.maps.model.MarkerOptions
 import com.amap.api.maps.model.PolylineOptions
 import com.amap.api.services.core.LatLonPoint
-import com.amap.api.services.route.DrivePath
 import com.xnavi.app.ui.components.AmapView
 import com.xnavi.app.viewmodel.*
 
@@ -75,30 +74,25 @@ fun RoutePlanScreen(
             when (routeViewModel.travelMode) {
                 TravelMode.DRIVING -> {
                     routeViewModel.driveRouteResult?.paths?.firstOrNull()?.let { path ->
-                        val points = convertDrivePathToLatLngList(path)
-                        map.addPolyline(
-                            PolylineOptions().addAll(points)
-                                .color(0xFF1678FF.toInt()).width(15f)
-                        )
+                        val startPoint = routeViewModel.origin?.latLng
+                        val endPoint = routeViewModel.destination?.latLng
+                        if (startPoint != null && endPoint != null) {
+                            val points = listOf(startPoint, endPoint)
+                            map.addPolyline(
+                                PolylineOptions().addAll(points)
+                                    .color(0xFF1678FF.toInt()).width(15f)
+                            )
+                            zoomToFit(map, points)
+                        }
                         showRouteDetail = true
-                        zoomToFit(map, points)
                     }
                 }
                 TravelMode.TRANSIT -> {
                     routeViewModel.busRouteResult?.paths?.firstOrNull()?.let { path ->
-                        val points = mutableListOf<LatLng>()
-                        path.steps.forEach { step ->
-                            step.polyline?.let { pl ->
-                                val coords = pl.split(";")
-                                coords.forEach { coord ->
-                                    val parts = coord.split(",")
-                                    if (parts.size == 2) {
-                                        points.add(LatLng(parts[1].toDouble(), parts[0].toDouble()))
-                                    }
-                                }
-                            }
-                        }
-                        if (points.isNotEmpty()) {
+                        val startPoint = routeViewModel.origin?.latLng
+                        val endPoint = routeViewModel.destination?.latLng
+                        if (startPoint != null && endPoint != null) {
+                            val points = listOf(startPoint, endPoint)
                             map.addPolyline(
                                 PolylineOptions().addAll(points)
                                     .color(0xFF00B061.toInt()).width(15f)
@@ -110,18 +104,10 @@ fun RoutePlanScreen(
                 }
                 TravelMode.RIDING -> {
                     routeViewModel.rideRouteResult?.paths?.firstOrNull()?.let { path ->
-                        val points = mutableListOf<LatLng>()
-                        path.steps.forEach { step ->
-                            step.polyline?.let { pl ->
-                                pl.split(";").forEach { coord ->
-                                    val parts = coord.split(",")
-                                    if (parts.size == 2) {
-                                        points.add(LatLng(parts[1].toDouble(), parts[0].toDouble()))
-                                    }
-                                }
-                            }
-                        }
-                        if (points.isNotEmpty()) {
+                        val startPoint = routeViewModel.origin?.latLng
+                        val endPoint = routeViewModel.destination?.latLng
+                        if (startPoint != null && endPoint != null) {
+                            val points = listOf(startPoint, endPoint)
                             map.addPolyline(
                                 PolylineOptions().addAll(points)
                                     .color(0xFFFF6B35.toInt()).width(15f)
@@ -133,18 +119,10 @@ fun RoutePlanScreen(
                 }
                 TravelMode.WALKING -> {
                     routeViewModel.walkRouteResult?.paths?.firstOrNull()?.let { path ->
-                        val points = mutableListOf<LatLng>()
-                        path.steps.forEach { step ->
-                            step.polyline?.let { pl ->
-                                pl.split(";").forEach { coord ->
-                                    val parts = coord.split(",")
-                                    if (parts.size == 2) {
-                                        points.add(LatLng(parts[1].toDouble(), parts[0].toDouble()))
-                                    }
-                                }
-                            }
-                        }
-                        if (points.isNotEmpty()) {
+                        val startPoint = routeViewModel.origin?.latLng
+                        val endPoint = routeViewModel.destination?.latLng
+                        if (startPoint != null && endPoint != null) {
+                            val points = listOf(startPoint, endPoint)
                             map.addPolyline(
                                 PolylineOptions().addAll(points)
                                     .color(0xFFFF6B35.toInt()).width(15f)
@@ -187,7 +165,7 @@ fun RoutePlanScreen(
 
             TravelModeTabs(
                 selectedMode = routeViewModel.travelMode,
-                onModeSelected = { routeViewModel.setTravelMode(it) }
+                onModeSelected = { routeViewModel.changeTravelMode(it) }
             )
 
             Box(modifier = Modifier.weight(1f)) {
@@ -323,7 +301,6 @@ private fun RouteDetailCard(
                         Row(horizontalArrangement = Arrangement.spacedBy(24.dp)) {
                             InfoChip("距离", info.distance)
                             InfoChip("时间", info.duration)
-                            InfoChip("红绿灯", "${info.trafficLights}个")
                         }
                         Spacer(Modifier.height(12.dp))
                         Button(onClick = onNavigate, modifier = Modifier.fillMaxWidth()) {
@@ -349,7 +326,6 @@ private fun RouteDetailCard(
                                     Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                                         Text("${route.distance}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                                         Text("${route.duration}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                                        Text("步行${route.walkingDistance}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                                     }
                                 }
                             }
@@ -382,21 +358,6 @@ private fun InfoChip(label: String, value: String) {
         Text(label, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         Text(value, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
     }
-}
-
-private fun convertDrivePathToLatLngList(path: DrivePath): List<LatLng> {
-    val points = mutableListOf<LatLng>()
-    path.steps.forEach { step ->
-        step.polyline?.let { pl ->
-            pl.split(";").forEach { coord ->
-                val parts = coord.split(",")
-                if (parts.size == 2) {
-                    points.add(LatLng(parts[1].toDouble(), parts[0].toDouble()))
-                }
-            }
-        }
-    }
-    return points
 }
 
 private fun zoomToFit(map: AMap, points: List<LatLng>) {

@@ -37,18 +37,10 @@ class NavigationViewModel : ViewModel() {
     private var currentPointIndex by mutableIntStateOf(0)
     private var navJob: Job? = null
 
-    fun initialize(drivePath: DrivePath) {
+    fun initialize(drivePath: DrivePath, startLatLng: LatLng, endLatLng: LatLng) {
         routePoints.clear()
-        drivePath.steps.forEach { step ->
-            step.polyline?.let { polyline ->
-                polyline.split(";").forEach { coord ->
-                    val parts = coord.split(",")
-                    if (parts.size == 2) {
-                        routePoints.add(LatLng(parts[1].toDouble(), parts[0].toDouble()))
-                    }
-                }
-            }
-        }
+        routePoints.add(startLatLng)
+        routePoints.add(endLatLng)
 
         val totalDistance = if (drivePath.distance < 1000) "${drivePath.distance.toInt()}米"
         else "%.1f公里".format(drivePath.distance / 1000f)
@@ -65,8 +57,8 @@ class NavigationViewModel : ViewModel() {
         navState = NavState(
             remainingDistance = totalDistance,
             remainingDuration = totalDuration,
-            currentRoadName = firstStep?.road ?: "",
-            nextTurnDescription = firstStep?.instruction ?: "",
+            currentRoadName = "",
+            nextTurnDescription = firstStep?.instruction ?: "开始导航",
             nextTurnDistance = formatStepDistance(firstStep?.distance ?: 0f),
             isNavigating = false,
             totalDistance = totalDistance,
