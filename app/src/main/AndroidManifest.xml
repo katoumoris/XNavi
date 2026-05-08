@@ -21,7 +21,7 @@
         android:theme="@style/Theme.XNavi">
         <meta-data
             android:name="com.amap.api.v2.apikey"
-            android:value="YOUR_AMAP_API_KEY" />
+            android:value="ddd54fb45cd5ba7e13368d1e9c484661" />
         <activity
             android:name=".MainActivity"
             android:exported="true"
