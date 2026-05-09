@@ -87,16 +87,8 @@ fun RoutePlanScreen(
                 TravelMode.TRANSIT -> {
                     routeViewModel.busRouteResult?.paths?.firstOrNull()?.let { path ->
                         val points = mutableListOf<LatLng>()
-                        path.steps.forEach { step ->
-                            step.polyline?.let { pl ->
-                                val coords = pl.split(";")
-                                coords.forEach { coord ->
-                                    val parts = coord.split(",")
-                                    if (parts.size == 2) {
-                                        points.add(LatLng(parts[1].toDouble(), parts[0].toDouble()))
-                                    }
-                                }
-                            }
+                        path.polyline?.forEach { point ->
+                            points.add(LatLng(point.latitude, point.longitude))
                         }
                         if (points.isNotEmpty()) {
                             map.addPolyline(
@@ -111,15 +103,8 @@ fun RoutePlanScreen(
                 TravelMode.RIDING -> {
                     routeViewModel.rideRouteResult?.paths?.firstOrNull()?.let { path ->
                         val points = mutableListOf<LatLng>()
-                        path.steps.forEach { step ->
-                            step.polyline?.let { pl ->
-                                pl.split(";").forEach { coord ->
-                                    val parts = coord.split(",")
-                                    if (parts.size == 2) {
-                                        points.add(LatLng(parts[1].toDouble(), parts[0].toDouble()))
-                                    }
-                                }
-                            }
+                        path.polyline?.forEach { point ->
+                            points.add(LatLng(point.latitude, point.longitude))
                         }
                         if (points.isNotEmpty()) {
                             map.addPolyline(
@@ -134,15 +119,8 @@ fun RoutePlanScreen(
                 TravelMode.WALKING -> {
                     routeViewModel.walkRouteResult?.paths?.firstOrNull()?.let { path ->
                         val points = mutableListOf<LatLng>()
-                        path.steps.forEach { step ->
-                            step.polyline?.let { pl ->
-                                pl.split(";").forEach { coord ->
-                                    val parts = coord.split(",")
-                                    if (parts.size == 2) {
-                                        points.add(LatLng(parts[1].toDouble(), parts[0].toDouble()))
-                                    }
-                                }
-                            }
+                        path.polyline?.forEach { point ->
+                            points.add(LatLng(point.latitude, point.longitude))
                         }
                         if (points.isNotEmpty()) {
                             map.addPolyline(
@@ -386,15 +364,8 @@ private fun InfoChip(label: String, value: String) {
 
 private fun convertDrivePathToLatLngList(path: DrivePath): List<LatLng> {
     val points = mutableListOf<LatLng>()
-    path.steps.forEach { step ->
-        step.polyline?.let { pl ->
-            pl.split(";").forEach { coord ->
-                val parts = coord.split(",")
-                if (parts.size == 2) {
-                    points.add(LatLng(parts[1].toDouble(), parts[0].toDouble()))
-                }
-            }
-        }
+    path.polyline?.forEach { point ->
+        points.add(LatLng(point.latitude, point.longitude))
     }
     return points
 }

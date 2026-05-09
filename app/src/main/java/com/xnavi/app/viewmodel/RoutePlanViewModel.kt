@@ -104,7 +104,7 @@ class RoutePlanViewModel(application: Application) : AndroidViewModel(applicatio
                         driveRouteInfo = DriveRouteInfo(
                             distance = formatDistance(path.distance),
                             duration = formatDuration(path.duration),
-                            trafficLights = path.trafficlights,
+                            trafficLights = path.totalTrafficlights,
                             tolls = formatDistance(path.tolls)
                         )
                     }
@@ -120,24 +120,27 @@ class RoutePlanViewModel(application: Application) : AndroidViewModel(applicatio
                     transitRoutes.clear()
                     result.paths.forEach { path ->
                         val steps = path.steps.map { step ->
-                            when (step.busLine) {
-                                is RouteBusLineItem -> {
-                                    val busLine = step.busLine as RouteBusLineItem
-                                    "${step.instruction}: 乘坐 ${busLine.busLineName}"
+                            when {
+                                step.walk != null -> {
+                                    "步行 ${formatDistance(step.walk!!.distance)}"
                                 }
-                                is RouteRailwayItem -> {
-                                    val rail = step.busLine as RouteRailwayItem
-                                    "${step.instruction}: 乘坐 ${rail.name}"
+                                step.busLines != null && step.busLines!!.isNotEmpty() -> {
+                                    val busLine = step.busLines!!.first()
+                                    "乘坐 ${busLine.busLineName}"
                                 }
-                                else -> step.instruction
+                                step.railway != null -> {
+                                    val rail = step.railway!!
+                                    "乘坐 ${rail.name}"
+                                }
+                                else -> ""
                             }
                         }
                         transitRoutes.add(
                             TransitRouteInfo(
-                                title = "${getTransitTitle(path.busPathType)}, ${path.duration / 60}分钟",
+                                title = "公交方案, ${path.duration / 60}分钟",
                                 distance = formatDistance(path.distance),
                                 duration = formatDuration(path.duration),
-                                walkingDistance = formatDistance(path.walkingDistance),
+                                walkingDistance = formatDistance(path.walkDistance),
                                 steps = steps
                             )
                         )
@@ -186,19 +189,19 @@ class RoutePlanViewModel(application: Application) : AndroidViewModel(applicatio
 
         when (travelMode) {
             TravelMode.DRIVING -> {
-                val query = RouteSearch.DriveRouteQuery(fromQuery, RouteSearch.DRIVING_DEFAULT, null, null, "")
+                val query = RouteSearch.DriveRouteQuery(fromQuery, RouteSearch.DrivingDefault, null, null, "")
                 routeSearch.calculateDriveRouteAsyn(query)
             }
             TravelMode.TRANSIT -> {
-                val query = RouteSearch.BusRouteQuery(fromQuery, RouteSearch.BUS_DEFAULT, null, 0)
+                val query = RouteSearch.BusRouteQuery(fromQuery, RouteSearch.BusDefault, null, 0)
                 routeSearch.calculateBusRouteAsyn(query)
             }
             TravelMode.RIDING -> {
-                val query = RouteSearch.RideRouteQuery(fromQuery, RouteSearch.RIDING_DEFAULT)
+                val query = RouteSearch.RideRouteQuery(fromQuery, RouteSearch.RidingDefault)
                 routeSearch.calculateRideRouteAsyn(query)
             }
             TravelMode.WALKING -> {
-                val query = RouteSearch.WalkRouteQuery(fromQuery, RouteSearch.WALK_DEFAULT)
+                val query = RouteSearch.WalkRouteQuery(fromQuery, RouteSearch.WalkDefault)
                 routeSearch.calculateWalkRouteAsyn(query)
             }
         }
@@ -214,11 +217,4 @@ class RoutePlanViewModel(application: Application) : AndroidViewModel(applicatio
         else "${seconds / 3600}小时${(seconds % 3600) / 60}分钟"
     }
 
-    private fun getTransitTitle(type: Int): String = when (type) {
-        1 -> "地铁"
-        2 -> "地铁/公交"
-        3 -> "公交"
-        4 -> "公交/地铁"
-        else -> "公交/地铁"
-    }
 }

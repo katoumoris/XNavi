@@ -39,15 +39,8 @@ class NavigationViewModel : ViewModel() {
 
     fun initialize(drivePath: DrivePath) {
         routePoints.clear()
-        drivePath.steps.forEach { step ->
-            step.polyline?.let { polyline ->
-                polyline.split(";").forEach { coord ->
-                    val parts = coord.split(",")
-                    if (parts.size == 2) {
-                        routePoints.add(LatLng(parts[1].toDouble(), parts[0].toDouble()))
-                    }
-                }
-            }
+        drivePath.polyline?.forEach { point ->
+            routePoints.add(LatLng(point.latitude, point.longitude))
         }
 
         val totalDistance = if (drivePath.distance < 1000) "${drivePath.distance.toInt()}米"
